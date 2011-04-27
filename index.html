@@ -1,4 +1,39 @@
 <html>
+  
+  <head>
+    <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+  </head>
+  
+  <body>
+   
+   <div>
+     <form enctype="multipart/form-data" action="upload.py" method="post">
+     <div><input type="file" name="filename" /></div>
+     <div><input type="submit" value="Upload" /></div>
+     </form>
+   </div>
+
+   <div>
+     <form action="average.py" method="post">
+	<div>
+	  <select name="dropdown">
+	  <option value="files" selected>-- Files Uploaded --</option>
+    	  <!--{% for csvfile in csvfiles %}
+      	    {% if csvfile.author %}
+		<option value="">{{ csvfile.author.nickname }}</option>
+      	    {% endif %}
+    	  {% endfor %}-->
+	  </select>
+	</div>
+	<div><input type="submit" value="Compute"/></div>
+     </form>
+   </div>
+  </body>
+
+</html>
+
+<!--
+<html>
   <head>
     <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
   </head>
@@ -21,3 +56,4 @@
 
   </body>
 </html>
+-->

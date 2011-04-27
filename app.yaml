@@ -8,4 +8,4 @@ handlers:
   static_dir: stylesheets
 
 - url: /.*
-  script: average.py
+  script: main.py
