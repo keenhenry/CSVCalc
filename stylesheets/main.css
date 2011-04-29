@@ -2,3 +2,7 @@ body {
   font-family: Verdana, Helvetica, sans-serif;
   background-color: #DDDDDD;
 }
+
+ul {
+  list-style-type: none;
+}
