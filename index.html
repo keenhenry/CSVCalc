@@ -1,5 +1,5 @@
 <html>
-  
+  <title>CSV Calculator</title> 
   <head>
     <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
   </head>
@@ -7,7 +7,7 @@
   <body>
    
    <div>
-     <form enctype="multipart/form-data" action="upload.py" method="post">
+     <form enctype="multipart/form-data" action="{{upload_url}}" method="post">
      <div><input type="file" name="filename" /></div>
      <div><input type="submit" value="Upload" /></div>
      </form>
@@ -18,42 +18,23 @@
 	<div>
 	  <select name="dropdown">
 	  <option value="files" selected>-- Files Uploaded --</option>
-    	  <!--{% for csvfile in csvfiles %}
-      	    {% if csvfile.author %}
-		<option value="">{{ csvfile.author.nickname }}</option>
-      	    {% endif %}
-    	  {% endfor %}-->
+    	  {% for pair in fileurl_pairs %}
+		<option value="csvfilename">{{ pair.0 }}</option>
+    	  {% endfor %}
 	  </select>
 	</div>
 	<div><input type="submit" value="Compute"/></div>
      </form>
    </div>
+
+   <div>
+     <h3>Computed CSV files</h3>
+     <ul>
+     {% for pair in fileurl_pairs %}
+	<li><a href="{{pair.1}}">{{ pair.0 }}</a></li>
+     {% endfor %}
+     <ul>
+   </div>
   </body>
 
 </html>
-
-<!--
-<html>
-  <head>
-    <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
-  </head>
-  <body>
-    {% for greeting in greetings %}
-      {% if greeting.author %}
-        <b>{{ greeting.author.nickname }}</b> wrote:
-      {% else %}
-        An anonymous person wrote:
-      {% endif %}
-      <blockquote>{{ greeting.content|escape }}</blockquote>
-    {% endfor %}
-
-    <form action="/sign" method="post">
-      <div><textarea name="content" rows="3" cols="60"></textarea></div>
-      <div><input type="submit" value="Upload File"></div>
-    </form>
-
-    <a href="{{ url }}">{{ url_linktext }}</a>
-
-  </body>
-</html>
--->
