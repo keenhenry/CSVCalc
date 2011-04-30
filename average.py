@@ -21,7 +21,7 @@ def main():
    
     # Parse the content read from the blob
     #for line in blob_reader:
-    with open('data.csv', 'rb') as f:
+    with open('data-mini.csv', 'rb') as f:
     	old_gvkey, old_conm, old_Month = None, None, None
 	m_cnt, c_cnt, m_total, c_total = 0, 0, 0, 0
         rpt_month = open('reports/rpt-month.csv', 'wb')
@@ -51,13 +51,16 @@ def main():
 	    else:
 	    	c_cnt += m_cnt
 		c_total += m_total
+        	print >>rpt_month, old_gvkey,'|', old_conm,'|', old_Month,'|', m_total / m_cnt
             	print >>rpt_compy, old_gvkey,'|', old_conm,'|', c_total / c_cnt
 	    	old_gvkey, old_Month, old_conm = row['gvkey'], row['Month'], row['conm']
 		m_cnt, c_cnt, c_total = 1, 0, 0
 		m_total = 0 if row['ILLIQ']=='#DIV/0!' else float(row['ILLIQ'])
 
 	# Need to think about a way to deal with the last row of csv file
-	# 
+	#
+	c_total += m_total
+	c_cnt += m_cnt
         print >>rpt_month, old_gvkey,'|', old_conm,'|', old_Month,'|', m_total / m_cnt
         print >>rpt_compy, old_gvkey,'|', old_conm,'|', c_total / c_cnt
 
