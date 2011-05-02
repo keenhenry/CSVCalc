@@ -5,7 +5,6 @@
   </head>
   
   <body>
-   
    <div>
      <form enctype="multipart/form-data" action="{{upload_url}}" method="post">
      <div><input type="file" name="filename" /></div>
@@ -19,7 +18,7 @@
 	  <select name="dropdown">
 	  <option value="files" selected>-- Files Uploaded --</option>
     	  {% for pair in fileurl_pairs %}
-		<option value="csvfilename">{{ pair.0 }}</option>
+		<option value="{{ forloop.counter }}">{{ pair.0 }}</option>
     	  {% endfor %}
 	  </select>
 	</div>
