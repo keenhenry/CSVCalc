@@ -3,6 +3,9 @@
 
 import csv
 
+from google.appengine.api import files
+#from __future__ import with_statement
+
 class CSVCalc(object):
   '''
   '''
