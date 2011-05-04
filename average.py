@@ -1,24 +1,28 @@
 #!/usr/bin/python
 #
 
-import csv
-
+from __future__ import with_statement
 from google.appengine.api import files
-#from __future__ import with_statement
+from google.appengine.ext import blobstore
+import csv
 
 class CSVCalc(object):
   '''
   '''
   
-  def __init__(self, src_file=None):
+  def __init__(self, blob_key=None):
     '''
     '''
-    self.src = src_file
-    self.tgt_m = None
-    self.tgt_c = None
+    self.src = blob_key
+    self.month_rpt = None
+    self.compy_rpt = None
+    #self.tgt_m = None
+    #self.tgt_c = None
     self.reader = None
-    self.writer_m = None
-    self.writer_c = None
+    #self.writer_m = None
+    #self.writer_c = None
+    self.rows_month = ''
+    self.rows_compy = ''
 
     self.old_gvkey, self.old_conm, self.old_Month = None, None, None
     self.m_cnt, self.c_cnt, self.m_total, self.c_total = 0, 0, 0, 0
@@ -26,16 +30,26 @@ class CSVCalc(object):
   def prepare_reader(self):
     ""
 
-    if not self.src: self.src = open('data-mini.csv','rb')
-    self.reader = csv.DictReader(self.src)
+    #if not self.src: self.src = open('data-mini.csv','rb')
+    blob_reader = blobstore.BlobReader(self.src)
+    self.reader = csv.DictReader(blob_reader)
 
   def prepare_writers(self):
     ""
-    self.tgt_m = open('reports/rpt-month.csv','wb')
-    self.tgt_c = open('reports/rpt-company.csv','wb')
+    return
+    # create new blobstore files for writing
+    #self.month_rpt = files.blobstore.create(mime_type='application/octet-stream')
+    #self.compy_rpt = files.blobstore.create(mime_type='application/octet-stream')
+    #self.tgt_m = files.open(self.month_rpt,'a')
+    #self.tgt_c = files.open(self.compy_rpt,'a')
 
-    self.writer_m = csv.writer(self.tgt_m, quoting=csv.QUOTE_NONNUMERIC)
-    self.writer_c = csv.writer(self.tgt_c, quoting=csv.QUOTE_NONNUMERIC)
+    #self.writer_m = csv.writer(self.tgt_m, quoting=csv.QUOTE_NONNUMERIC)
+    #self.writer_c = csv.writer(self.tgt_c, quoting=csv.QUOTE_NONNUMERIC)
+
+  def get_rpt_blobkeys(self):
+    rpt_month_blobkey = files.blobstore.get_blob_key(self.month_rpt)
+    rpt_compy_blobkey = files.blobstore.get_blob_key(self.compy_rpt)
+    return (rpt_month_blobkey, rpt_compy_blobkey)
 
   def _init_frome_first_row(self, o_gvkey, o_month, o_conm, o_illiq):
     ""
@@ -47,12 +61,18 @@ class CSVCalc(object):
 
   def _print_to_month_rpt(self):
     ""
-    self.writer_m.writerow([int(self.old_gvkey), self.old_conm, int(self.old_Month), self.m_total/self.m_cnt])
-
+    #self.writer_m.writerow([int(self.old_gvkey), self.old_conm, int(self.old_Month), self.m_total/self.m_cnt])
+    self.rows_month += self.old_gvkey + ',\"' + \
+    	   	       self.old_conm + '\",' + \
+	   	       self.old_Month + ',' + \
+	   	       str(self.m_total/self.m_cnt) + '\r\n'
 
   def _print_to_compy_rpt(self):
     ""
-    self.writer_c.writerow([int(self.old_gvkey), self.old_conm, self.c_total/self.c_cnt])
+    #self.writer_c.writerow([int(self.old_gvkey), self.old_conm, self.c_total/self.c_cnt])
+    self.rows_compy += self.old_gvkey + ',\"' + \
+    		       self.old_conm + '\",' + \
+	   	       str(self.c_total/self.c_cnt) + '\r\n'
 
   def _update_flags_within_month(self, row):
     self.m_cnt += 1
@@ -75,7 +95,7 @@ class CSVCalc(object):
     self.c_cnt += self.m_cnt
     self.c_total += self.m_total
 
-  def _write_last_row(self):
+  def _print_last_rows(self):
     ""
     self._increment_company_flags()
 
@@ -83,18 +103,22 @@ class CSVCalc(object):
     self._print_to_month_rpt()
     self._print_to_compy_rpt()
 
-  def _close_files(self):
-    self.tgt_c.close()
-    self.tgt_m.close()
-    self.src.close()
+  def close_files(self):
+    files.finalize(self.month_rpt)
+    files.finalize(self.compy_rpt)
+    #self.tgt_c.close()
+    #self.tgt_m.close()
+    #self.src.close()
   
   def parse(self):
     ""
-
+    
     try:
       # write the header rows into target report files first
-      self.writer_m.writerow([ 'gvkey', 'conm', 'Month', 'ILLIQ_average'])
-      self.writer_c.writerow([ 'gvkey', 'conm', 'ILLIQ_average'])
+      #self.writer_m.writerow([ 'gvkey', 'conm', 'Month', 'ILLIQ_average'])
+      #self.writer_c.writerow([ 'gvkey', 'conm', 'ILLIQ_average'])
+      self.rows_month += '\"gvkey\",'+'\"conm\",'+'\"Month\",'+'\"ILLIQ_average\"\r\n'
+      self.rows_compy += '\"gvkey\",'+'\"conm\",'+'\"ILLIQ_average\"\r\n'
 
       # produce the rest of the reports
       for row in self.reader:
@@ -116,19 +140,25 @@ class CSVCalc(object):
 	  self._print_to_month_rpt()
 	  self._print_to_compy_rpt()
 	  self._update_flags_after_compy(row)
-      self._write_last_row()
+      self._print_last_rows()
     finally:
-      self._close_files()
+      self.month_rpt = files.blobstore.create(mime_type='application/octet-stream')
+      self.compy_rpt = files.blobstore.create(mime_type='application/octet-stream')
+
+      with files.open(self.month_rpt, 'a') as f:
+      	#self.tgt_m = files.open(self.month_rpt,'a')
+      	#self.tgt_c = files.open(self.compy_rpt,'a')
+        f.write(self.rows_month)
+      
+      with files.open(self.compy_rpt, 'a') as f:
+      	#self.tgt_m = files.open(self.month_rpt,'a')
+      	#self.tgt_c = files.open(self.compy_rpt,'a')
+        f.write(self.rows_compy)
+      #self.tgt_c.write(self.rows_compy)
+      #self._close_files()
 
 def main():
 
-    # First thing is to get the blob key of the file you want to calculate.
-    #blob_key =
-
-    # Construct BlobReader object
-    #blob_reader = blobstore.BlobReader(blob_key, buffer_size=1048576)
-
-    # Parse the content read from the blob
     parser = CSVCalc(open('data-mini.csv', 'rb'))
 
     parser.prepare_reader()
