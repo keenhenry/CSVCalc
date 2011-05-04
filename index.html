@@ -16,8 +16,8 @@
      <form action="{{csvparser_url}}" method="post">
 	<div>
 	  <select name="dropdown">
-	  <option value="files" selected>-- Files Uploaded --</option>
-    	  {% for pair in fileurl_pairs %}
+	  <option value="default" selected>-- Files Uploaded --</option>
+    	  {% for pair in filekey_pairs %}
 		<option value="{{ pair.1 }}">{{ pair.0 }}</option>
     	  {% endfor %}
 	  </select>
@@ -29,10 +29,11 @@
    <div>
      <h3>Computed CSV files</h3>
      <ul>
-	<!--<li><a href="/parse">{{ todownload }}</a></li>-->
-     <!--{% for pair in fileurl_pairs %}
-	<li><a href="{{pair.1}}">{{ pair.0 }}</a></li>
-     {% endfor %}-->
+     {% for pairurls in rpt_pair_urls %}
+	{% if pairurls %}
+	<li><a href="{{pairurls.0}}">rpt-month_{{forloop.counter}}.csv</a> : <a href="{{pairurls.1}}">rpt-compy_{{forloop.counter}}.csv</a></li>
+	{% endif %}
+     {% endfor %}
      <ul>
    </div>
   </body>
