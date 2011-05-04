@@ -9,26 +9,31 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import blobstore_handlers
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
+from average import CSVCalc
+
+rpt_blobkey_pairs = []
 
 class MainHandler(webapp.RequestHandler):
-   
-    def __init__(self):
-    	self.template_values = {}
-
     def get(self):
 	upload_url = blobstore.create_upload_url('/upload')
 	blobs = blobstore.BlobInfo.all()
-	file_downloadurl_pairs = [[str(blob.filename), '/download/'+str(blob.key())] for blob in blobs]
 	csvparser_url = '/parse'
-	#csvfiles = [str(blob.filename) for blob in blobs]	
-	#download_urls = ['/download/'+str(blob.key()) for blob in blobs]
+	file_blobkey_pairs = [[str(blob.filename), str(blob.key())] for blob in blobs]
+	#month_rpt_urls = ['/download/'+str(pair[0]) for pair in rpt_blobkey_pairs]
+	#compy_rpt_urls = ['/download/'+str(pair[1]) for pair in rpt_blobkey_pairs]
+	rpt_pair_urls = [('/download/'+str(pair[0]), '/download/'+str(pair[1])) for pair in rpt_blobkey_pairs]
 
-	self.template_values['upload_url'] = upload_url
-	self.template_values['fileurl_pairs'] = file_downloadurl_pairs
-	self.template_values['csvparser_url'] = csvparser_url
+	template_values = {
+		'upload_url': upload_url,
+		'filekey_pairs': file_blobkey_pairs,
+		'csvparser_url': csvparser_url,
+		'rpt_pair_urls': rpt_pair_urls
+		#'month_rpt_urls': month_rpt_urls,
+		#'compy_rpt_urls': compy_rpt_urls
+	}
 
 	path = os.path.join(os.path.dirname(__file__), 'index.html')
-        self.response.out.write(template.render(path, self.template_values))
+        self.response.out.write(template.render(path, template_values))
 
 class UploadHandler(blobstore_handlers.BlobstoreUploadHandler):
     def post(self):
@@ -38,10 +43,17 @@ class UploadHandler(blobstore_handlers.BlobstoreUploadHandler):
 
 class CSVParser(webapp.RequestHandler):
     def post(self):
-        download_url = self.request.get('dropdown') 	# the blob key in 'string' type!
-	#blob_reader = blobstore.BlobReader(blob_key)
+        blob_key = self.request.get('dropdown') 	# the blob key in 'string' type!
 
-        self.redirect(download_url)
+	if blob_key != 'default':
+    	    parser = CSVCalc(blob_key)
+	    parser.prepare_reader()
+    	    parser.prepare_writers()
+    	    parser.parse()
+	    parser.close_files()
+	    #(rpt_month, rpt_compy) = parser.get_rpt_blobkeys()
+	    rpt_blobkey_pairs.append(parser.get_rpt_blobkeys())
+        self.redirect('/')
 	#path = os.path.join(os.path.dirname(__file__), 'index.html')
         #self.response.out.write(template.render(path, template_values))
 
