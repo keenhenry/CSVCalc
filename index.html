@@ -6,6 +6,7 @@
   
   <body>
    <div>
+     <h3>Step 1: Upload Files</h3>
      <form enctype="multipart/form-data" action="{{upload_url}}" method="post">
      <div><input type="file" name="filename" /></div>
      <div><input type="submit" value="Upload" /></div>
@@ -13,26 +14,34 @@
    </div>
 
    <div>
+     <h3>Step 2: Select File to Make Reports</h3>
      <form action="{{csvparser_url}}" method="post">
 	<div>
 	  <select name="dropdown">
-	  <option value="default" selected>-- Files Uploaded --</option>
+	  <option value="default" selected>Files Uploaded</option>
     	  {% for blob in uploaded_blobs %}
 		<option value="{{ blob.1 }}">{{ blob.0 }}</option>
     	  {% endfor %}
 	  </select>
 	</div>
-	<div><input type="submit" value="Compute"/></div>
+	<div><input type="submit" value="Make Reports"/></div>
      </form>
    </div>
 
    <div>
      <h3>Generated Reports</h3>
-     <ul>
+     <table>
+     <!--<tr>
+	<th>Creation Time</th>
+	<th>Report Name</th>
+     </tr>-->
      {% for blob in rpt_blobs %}
-	<li><a href="{{blob.1}}">{{blob.0}}</a> : {{blob.2}} <!--<a href="{{compy_rpt.2}}">{{compy_rpt.1}}</a>--> </li>
+     <tr>
+	<td>{{blob.2}}</td> 
+	<td><a href="{{blob.1}}">{{blob.0}}</a></td> 
+     </tr>
      {% endfor %}
-     <ul>
+     </table>
    </div>
   </body>
 
