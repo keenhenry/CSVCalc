@@ -17,8 +17,8 @@
 	<div>
 	  <select name="dropdown">
 	  <option value="default" selected>-- Files Uploaded --</option>
-    	  {% for pair in filekey_pairs %}
-		<option value="{{ pair.1 }}">{{ pair.0 }}</option>
+    	  {% for blob in uploaded_blobs %}
+		<option value="{{ blob.1 }}">{{ blob.0 }}</option>
     	  {% endfor %}
 	  </select>
 	</div>
@@ -27,12 +27,10 @@
    </div>
 
    <div>
-     <h3>Computed CSV files</h3>
+     <h3>Generated Reports</h3>
      <ul>
-     {% for pairurls in rpt_pair_urls %}
-	{% if pairurls %}
-	<li><a href="{{pairurls.0}}">rpt-month_{{forloop.counter}}.csv</a> : <a href="{{pairurls.1}}">rpt-compy_{{forloop.counter}}.csv</a></li>
-	{% endif %}
+     {% for blob in rpt_blobs %}
+	<li><a href="{{blob.1}}">{{blob.0}}</a> : {{blob.2}} <!--<a href="{{compy_rpt.2}}">{{compy_rpt.1}}</a>--> </li>
      {% endfor %}
      <ul>
    </div>
