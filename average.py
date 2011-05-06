@@ -16,40 +16,21 @@ class CSVCalc(object):
     self.src = blob_key
     self.month_rpt = None
     self.compy_rpt = None
-    #self.tgt_m = None
-    #self.tgt_c = None
+    self.blob_reader = None
     self.reader = None
-    #self.writer_m = None
-    #self.writer_c = None
     self.rows_month = ''
     self.rows_compy = ''
 
+    # input file parsing control variables
     self.old_gvkey, self.old_conm, self.old_Month = None, None, None
     self.m_cnt, self.c_cnt, self.m_total, self.c_total = 0, 0, 0, 0
 
   def prepare_reader(self):
     ""
 
-    #if not self.src: self.src = open('data-mini.csv','rb')
-    blob_reader = blobstore.BlobReader(self.src)
-    self.reader = csv.DictReader(blob_reader)
-
-  def prepare_writers(self):
-    ""
-    return
-    # create new blobstore files for writing
-    #self.month_rpt = files.blobstore.create(mime_type='application/octet-stream')
-    #self.compy_rpt = files.blobstore.create(mime_type='application/octet-stream')
-    #self.tgt_m = files.open(self.month_rpt,'a')
-    #self.tgt_c = files.open(self.compy_rpt,'a')
-
-    #self.writer_m = csv.writer(self.tgt_m, quoting=csv.QUOTE_NONNUMERIC)
-    #self.writer_c = csv.writer(self.tgt_c, quoting=csv.QUOTE_NONNUMERIC)
-
-  def get_rpt_blobkeys(self):
-    rpt_month_blobkey = files.blobstore.get_blob_key(self.month_rpt)
-    rpt_compy_blobkey = files.blobstore.get_blob_key(self.compy_rpt)
-    return (rpt_month_blobkey, rpt_compy_blobkey)
+    if self.src:
+      self.blob_reader = blobstore.BlobReader(self.src)
+      self.reader = csv.DictReader(self.blob_reader)
 
   def _init_frome_first_row(self, o_gvkey, o_month, o_conm, o_illiq):
     ""
@@ -104,11 +85,9 @@ class CSVCalc(object):
     self._print_to_compy_rpt()
 
   def close_files(self):
+    self.blob_reader.close()
     files.finalize(self.month_rpt)
     files.finalize(self.compy_rpt)
-    #self.tgt_c.close()
-    #self.tgt_m.close()
-    #self.src.close()
   
   def parse(self):
     ""
@@ -142,28 +121,18 @@ class CSVCalc(object):
 	  self._update_flags_after_compy(row)
       self._print_last_rows()
     finally:
-      self.month_rpt = files.blobstore.create(mime_type='application/octet-stream')
-      self.compy_rpt = files.blobstore.create(mime_type='application/octet-stream')
+      # making up reports' file names
+      infile_blob_info = self.blob_reader.blob_info
+      month_rpt_filename = 'rpt-month-' + infile_blob_info.filename
+      compy_rpt_filename = 'rpt-compy-' + infile_blob_info.filename
 
+      # creating report blobs in blobstore
+      self.month_rpt = files.blobstore.create(mime_type='application/octet-stream', _blobinfo_uploaded_filename=month_rpt_filename)
+      self.compy_rpt = files.blobstore.create(mime_type='application/octet-stream', _blobinfo_uploaded_filename=compy_rpt_filename)
+
+      # writing data (in csv format) into blobs
       with files.open(self.month_rpt, 'a') as f:
-      	#self.tgt_m = files.open(self.month_rpt,'a')
-      	#self.tgt_c = files.open(self.compy_rpt,'a')
         f.write(self.rows_month)
       
       with files.open(self.compy_rpt, 'a') as f:
-      	#self.tgt_m = files.open(self.month_rpt,'a')
-      	#self.tgt_c = files.open(self.compy_rpt,'a')
         f.write(self.rows_compy)
-      #self.tgt_c.write(self.rows_compy)
-      #self._close_files()
-
-def main():
-
-    parser = CSVCalc(open('data-mini.csv', 'rb'))
-
-    parser.prepare_reader()
-    parser.prepare_writers()
-    parser.parse()
-
-if __name__ == '__main__':
-  main()
