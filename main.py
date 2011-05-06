@@ -11,25 +11,27 @@ from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
 from average import CSVCalc
 
-rpt_blobkey_pairs = []
-
 class MainHandler(webapp.RequestHandler):
     def get(self):
 	upload_url = blobstore.create_upload_url('/upload')
 	blobs = blobstore.BlobInfo.all()
 	csvparser_url = '/parse'
-	file_blobkey_pairs = [[str(blob.filename), str(blob.key())] for blob in blobs]
-	#month_rpt_urls = ['/download/'+str(pair[0]) for pair in rpt_blobkey_pairs]
-	#compy_rpt_urls = ['/download/'+str(pair[1]) for pair in rpt_blobkey_pairs]
-	rpt_pair_urls = [('/download/'+str(pair[0]), '/download/'+str(pair[1])) for pair in rpt_blobkey_pairs]
+	uploaded_blobinfos, rpt_blobinfos = [], []
 
+	for blob in blobs:
+	  filename = str(blob.filename)
+	  if not filename[0:3]=='rpt':
+	    uploaded_blobinfos.append( (filename, str(blob.key())) )
+	  else:
+	    create_time = blob.creation
+	    rpt_blobinfos.append( (filename, '/download/'+str(blob.key()), create_time.strftime("%Y-%m-%d %H:%M:%S"), create_time) )
+	rpt_blobinfos.sort(key=lambda t: t[3])	# sort by creation time
+	
 	template_values = {
 		'upload_url': upload_url,
-		'filekey_pairs': file_blobkey_pairs,
 		'csvparser_url': csvparser_url,
-		'rpt_pair_urls': rpt_pair_urls
-		#'month_rpt_urls': month_rpt_urls,
-		#'compy_rpt_urls': compy_rpt_urls
+		'uploaded_blobs': uploaded_blobinfos,
+		'rpt_blobs': rpt_blobinfos,
 	}
 
 	path = os.path.join(os.path.dirname(__file__), 'index.html')
@@ -43,24 +45,18 @@ class UploadHandler(blobstore_handlers.BlobstoreUploadHandler):
 
 class CSVParser(webapp.RequestHandler):
     def post(self):
-        blob_key = self.request.get('dropdown') 	# the blob key in 'string' type!
+        blob_key = self.request.get('dropdown') 	# the blob key in 'str' type!
 
 	if blob_key != 'default':
     	    parser = CSVCalc(blob_key)
 	    parser.prepare_reader()
-    	    parser.prepare_writers()
     	    parser.parse()
 	    parser.close_files()
-	    #(rpt_month, rpt_compy) = parser.get_rpt_blobkeys()
-	    rpt_blobkey_pairs.append(parser.get_rpt_blobkeys())
         self.redirect('/')
-	#path = os.path.join(os.path.dirname(__file__), 'index.html')
-        #self.response.out.write(template.render(path, template_values))
 
 class DownloadHandler(blobstore_handlers.BlobstoreDownloadHandler):
     def get(self, blob_key):
         blob_key = str(urllib.unquote(blob_key))
-	
 	if not blobstore.get(blob_key):
 	    self.error(404)
 	else:
@@ -71,7 +67,7 @@ def main():
           [('/', MainHandler),
            ('/upload', UploadHandler),
            ('/download/([^/]+)?', DownloadHandler),
-	   ('/parse', CSVParser)	# will be changed to CSVParser later
+	   ('/parse', CSVParser)	
           ], debug=True)
     run_wsgi_app(application)
 
