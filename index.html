@@ -5,32 +5,33 @@
   </head>
   
   <body>
-   <div>
+   <div id='header'><h1>Comma-Seperated Values File Parser</h1></div>
+   <div id='top'>
      <h3>Step 1: Upload Files</h3>
      <form enctype="multipart/form-data" action="{{upload_url}}" method="post">
-     <div><input type="file" name="filename" /></div>
-     <div><input type="submit" value="Upload" /></div>
+     <div id='file-select'><input type="file" name="filename" /></div>
+     <div id='upload-button'><input type="submit" value="Upload" /></div>
      </form>
    </div>
 
-   <div>
+   <div id='center'>
      <h3>Step 2: Select File to Make Reports</h3>
      <form action="{{csvparser_url}}" method="post">
-	<div>
+	<div id='dropdown'>
 	  <select name="dropdown">
-	  <option value="default" selected>Files Uploaded</option>
+	  <option value="default" selected>Uploaded Files</option>
     	  {% for blob in uploaded_blobs %}
 		<option value="{{ blob.1 }}">{{ blob.0 }}</option>
     	  {% endfor %}
 	  </select>
 	</div>
-	<div><input type="submit" value="Make Reports"/></div>
+	<div id='report-button'><input type="submit" value="Make Reports"/></div>
      </form>
    </div>
 
-   <div>
+   <div id='bottom'>
      <h3>Generated Reports</h3>
-     <table>
+     <table id='report-table'>
      <!--<tr>
 	<th>Creation Time</th>
 	<th>Report Name</th>
