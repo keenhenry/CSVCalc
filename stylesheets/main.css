@@ -1,16 +1,57 @@
 body {
   font-family: Verdana, Helvetica, sans-serif;
-  background-color: #669900;
+  background-color: #FDEEF4;
+  text-align: center;
+}
+
+div#main {
+  margin-left: auto;
+  margin-right: auto;
+  width: 750px;
+  text-align: left;
 }
 
 form {
-  border-style: solid;
-  border-width: 3px;
-  border-color: #FFFF00;
+  margin-bottom: 3em;
+}
+
+fieldset
+{
+  border: 1px solid #781351;
+  width: 40em;
+}
+
+legend
+{
+  color: #fff;
+  background: #ffa20c;
+  border: 1px solid #781351;
+  padding: 2px 6px
+}
+
+input {
+  color: #781351;
+  background: #fee3ad;
+  border: 1px solid #781351
+  float: left;
+}
+
+input#upload-button {
+  color: #000;
+  background: #ffa20f;
+  border: 1px outset #d7b9c9
+  float: right;
+}
+
+input#report-button {
+  color: #000;
+  background: #ffa20f;
+  border: 1px outset #d7b9c9
+  float: right;
 }
 
 #report-table td {
-  padding-right: 20px;
+  padding-right: 40px;
 }
 
 ul {
