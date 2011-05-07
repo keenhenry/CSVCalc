@@ -5,29 +5,30 @@
   </head>
   
   <body>
-   <div id='header'><h1>Comma-Seperated Values File Parser</h1></div>
-   <div id='top'>
-     <h3>Step 1: Upload Files</h3>
-     <form enctype="multipart/form-data" action="{{upload_url}}" method="post">
-     <div id='file-select'><input type="file" name="filename" /></div>
-     <div id='upload-button'><input type="submit" value="Upload" /></div>
-     </form>
-   </div>
+  <div id="main">
+   
+   <h1 id="header">Comma-Seperated Values File Parser</h1>
+   
+   <form enctype="multipart/form-data" action="{{upload_url}}" method="post">
+     <fieldset>
+     <legend>Step 1: Upload Files</legend>
+     <input type="file" name="filename" />
+     <input id="upload-button" type="submit" value="Upload" />
+     </fieldset>
+   </form>
 
-   <div id='center'>
-     <h3>Step 2: Select File to Make Reports</h3>
-     <form action="{{csvparser_url}}" method="post">
-	<div id='dropdown'>
-	  <select name="dropdown">
-	  <option value="default" selected>Uploaded Files</option>
+   <form action="{{csvparser_url}}" method="post">
+     <fieldset>
+        <legend>Step 2: Select File to Make Reports</legend>
+	<select name="dropdown">
+	  <option value="default" selected>******** Uploaded Files ********</option>
     	  {% for blob in uploaded_blobs %}
-		<option value="{{ blob.1 }}">{{ blob.0 }}</option>
+	  <option value="{{ blob.1 }}">{{ blob.0 }}</option>
     	  {% endfor %}
-	  </select>
-	</div>
-	<div id='report-button'><input type="submit" value="Make Reports"/></div>
-     </form>
-   </div>
+	</select>
+	<input id="report-button" type="submit" value="Make Reports"/>
+     </fieldset>
+   </form>
 
    <div id='bottom'>
      <h3>Generated Reports</h3>
@@ -44,6 +45,8 @@
      {% endfor %}
      </table>
    </div>
+
+  </div>	<!-- End of main div -->
   </body>
 
 </html>
