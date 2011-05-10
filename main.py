@@ -39,8 +39,9 @@ class MainHandler(webapp.RequestHandler):
 
 class UploadHandler(blobstore_handlers.BlobstoreUploadHandler):
     def post(self):
-        #upload_files = self.get_uploads('filename')  # 'filename' is file upload field in the form
-        #blob_info = upload_files[0]
+        upload_files = self.get_uploads('filename')  # 'filename' is file upload field in the form
+        blob_info = upload_files[0]
+	if blob_info.filename==None and blob_info.size==0: blob_info.delete()
         self.redirect('/')
 
 class CSVParser(webapp.RequestHandler):
