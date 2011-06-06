@@ -39,15 +39,8 @@ class MainHandler(webapp.RequestHandler):
 
 class UploadHandler(blobstore_handlers.BlobstoreUploadHandler):
     def post(self):
-        upload_files = self.get_uploads('filename')  # 'filename' is file upload field in the form
-        blob_info = upload_files[0]
-
-	# this is a quick dirty way to pretend that 
-	# there is nothing happened when no file is selected for upload
-	# Form validation should be checked at front end using javascript
-	# however this code is still necessary if javascript is used
-	# for form validation.
-	if blob_info.filename==None and blob_info.size==0: blob_info.delete()
+        #upload_files = self.get_uploads('filename')  # 'filename' is file upload field in the form
+        #blob_info = upload_files[0]
         self.redirect('/')
 
 class CSVParser(webapp.RequestHandler):
