@@ -1,5 +1,4 @@
 #!/usr/bin/python
-#
 
 import os
 import urllib
@@ -9,7 +8,8 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import blobstore_handlers
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
-from average import CSVCalc
+#from average import CSVCalc
+from columnize import CSVOneColumn
 
 class MainHandler(webapp.RequestHandler):
     def get(self):
@@ -48,7 +48,8 @@ class CSVParser(webapp.RequestHandler):
         blob_key = self.request.get('dropdown') 	# the blob key in 'str' type!
 
 	if blob_key != 'default':
-    	    parser = CSVCalc(blob_key)
+    	    #parser = CSVCalc(blob_key)
+	    parser = CSVOneColumn(blob_key)
 	    parser.prepare_reader()
     	    parser.parse()
 	    parser.close_files()
